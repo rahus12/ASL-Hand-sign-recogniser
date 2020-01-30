@@ -1,11 +1,11 @@
 clc
-imds = imageDatastore('new asl','IncludeSubfolders',true,'LabelSource','foldernames');
+imds = imageDatastore('new asl','IncludeSubfolders',true,'LabelSource','foldernames'); # in place of 'new asl' give the name of your folder
 [imdsTrain,imdsValidation] = splitEachLabel(imds,0.9);
 imageAugmenter = imageDataAugmenter(...
     'RandRotation',[-20, 20],...
     'RandXTranslation',[-3,3],...
     'RandYTranslation',[-3,3]);
-imageSize = [224 224 3];
+imageSize = [224 224 3];        # googlenet only accepts images of 224x224 
 augimds = augmentedImageDatastore(imageSize,imdsTrain,'DataAugmentation',imageAugmenter);
 imdsValidation.ReadFcn = @(loc)imresize(imread(loc),[224 224]);
 imdsTrain.ReadFcn = @(loc)imresize(imread(loc),[224 224]);
@@ -23,8 +23,8 @@ end
 [learnableLayer,classLayer] = findLayersToReplace(lgraph);
 [learnableLayer,classLayer] 
 
-% numClasses = numel(categories(imdsTrain.Labels));
-numClasses = 27;
+numClasses = numel(categories(imdsTrain.Labels));
+
 if isa(learnableLayer,'nnet.cnn.layer.FullyConnectedLayer')
     newLearnableLayer = fullyConnectedLayer(numClasses, ...
         'Name','new_fc', ...
@@ -71,4 +71,4 @@ net = trainNetwork(augimds,lgraph,options);
 accuracy = mean(YPred == imdsValidation.Labels)
 
 Gfinal4 = net;
-save Gfinal4; 
+save Gfinal4;   #to save your model and re-use
